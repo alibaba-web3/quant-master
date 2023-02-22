@@ -30,7 +30,8 @@ df["累计投资"] = df["当天投资"].cumsum()
 df["balance"] = df[["累计BTC", "close"]].apply(lambda x: x["累计BTC"] * x["close"], axis=1)
 df['revenue'] = df[["balance", "累计投资"]].apply(lambda x: x["balance"] - x["累计投资"], axis=1)
 df["revenueRate"] = df[["revenue", "累计投资"]].apply(lambda x: x["revenue"] / x["累计投资"], axis=1)
+df["open_time"] = pd.to_datetime(df["open_time"])
 
+# 资金曲线
 df.plot('open_time', y=['revenueRate'])
-
 plt.show()
