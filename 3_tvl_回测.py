@@ -45,7 +45,7 @@ df.dropna(axis=0, how='any', inplace=True)
 df.loc[df['tvl变化'] <= 0, '当天投资'] = 0
 df.loc[df['tvl变化'] > 0, '当天投资'] = 100
 
-df.loc[df['当天投资'] > 0, '本次盈亏'] = (df["close"].shift(1) - df["close"]) / df["close"]
+df.loc[df['当天投资'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"]
 
 df["累计投资"] = df["当天投资"].cumsum()
 df["totalRevenue"] = df["本次盈亏"].cumsum()
