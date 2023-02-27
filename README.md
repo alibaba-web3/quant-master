@@ -1,6 +1,10 @@
 # quant-master
+
 量化回测
 
-1. 新建 data 文件夹
-2. 导入 spot.csv 文件
-3. 运行 2_回测.py 文件
+1. 运行 1_数据准备.py 文件, 下载 spot_1d.csv 文件
+2. 运行 2_回测.py 文件
+
+文件目录：
+data: 回测所需要的数据
+example: 回测案例
