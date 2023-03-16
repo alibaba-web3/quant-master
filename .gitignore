@@ -1,2 +1,5 @@
 data/**.csv
 .idea/
+script/config.json
+script/node_modules/
+script/.idea
