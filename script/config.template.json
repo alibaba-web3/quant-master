@@ -1,0 +1,6 @@
+{
+  "apiKey": "填入自己的 api key",
+  "apiSecret": "填入自己的 api secret",
+  "env": "local",
+  "proxy": "代理服务器地址"
+}
