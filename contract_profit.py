@@ -2,6 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from function import *
 
 # 示例策略：协议手续费 上升时买入并持有 1 天
 
@@ -50,11 +51,13 @@ df.loc[df['feeUp'] < 0, '当天投资'] = 0
 df.loc[df['当天投资'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"] - fee * 2
 
 df["累计投资"] = df["当天投资"].cumsum()
-df["totalRevenue"] = df["本次盈亏"].cumsum()
+df["revenueRate"] = df["本次盈亏"].cumsum()
 
 # 补充空缺的数据
-df["totalRevenue"] = df["totalRevenue"].fillna(method='pad')
+df["revenueRate"] = df["revenueRate"].fillna(method='pad')
+
+analyze_strategy(df)
 
 # 资金曲线
-df.plot('date', y=['totalRevenue'])
+df.plot('date', y=['revenueRate'])
 plt.show()

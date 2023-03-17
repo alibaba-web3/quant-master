@@ -2,6 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from function import *
 
 # 示例策略：BTC 定投
 
@@ -30,11 +31,13 @@ df["累计投资"] = df["当天投资"].cumsum()
 df["balance"] = df[["累计BTC", "close"]].apply(lambda x: x["累计BTC"] * x["close"], axis=1)
 df['revenue'] = df[["balance", "累计投资"]].apply(lambda x: x["balance"] - x["累计投资"], axis=1)
 df["revenueRate"] = df[["revenue", "累计投资"]].apply(lambda x: x["revenue"] / x["累计投资"], axis=1)
-df["openTime"] = pd.to_datetime(df["openTime"])
+df["date"] = pd.to_datetime(df["openTime"]).dt.date
+
+# 策略分析
+analyze_strategy(df)
 
 # 资金曲线
-df.plot('openTime', y=['revenueRate'])
+df.plot('date', y=['revenueRate'])
 plt.show()
 
-# 策略分析 TODO
-print("")
+

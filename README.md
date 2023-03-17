@@ -12,4 +12,4 @@ example: 回测案例
 pandas 字段约定：
 date: 日期
 balance: 账户余额
-totalRevenue: 总收益
+revenueRate: 总收益率
