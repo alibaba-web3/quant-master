@@ -8,3 +8,8 @@
 文件目录：
 data: 回测所需要的数据
 example: 回测案例
+
+pandas 字段约定：
+date: 日期
+balance: 账户余额
+revenueRate: 总收益率

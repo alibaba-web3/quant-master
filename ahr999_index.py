@@ -5,6 +5,7 @@ import pandas as pd
 
 from scipy.stats.mstats import gmean
 from datetime import datetime
+from function import *
 
 '''
 数据清洗
@@ -61,6 +62,9 @@ df["balance"] = df[["累计BTC", "close"]].apply(lambda x: x["累计BTC"] * x["c
 df['revenue'] = df[["balance", "累计投资"]].apply(lambda x: x["balance"] - x["累计投资"], axis=1)
 df["revenueRate"] = df[["revenue", "累计投资"]].apply(lambda x: x["revenue"] / x["累计投资"], axis=1)
 
+
+# 策略分析
+analyze_strategy(df)
 
 '''
 画图
