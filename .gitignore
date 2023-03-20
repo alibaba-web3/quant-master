@@ -3,3 +3,4 @@ data/**.csv
 script/config.json
 script/node_modules/
 script/.idea
+__pycache__/
