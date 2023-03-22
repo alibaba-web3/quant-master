@@ -1,6 +1,7 @@
 const config = require("./config.json");
 const HttpsProxyAgent = require("https-proxy-agent");
 const fetch = require("node-fetch");
+const exchangeInfo = require("./binanceExchangeInfo.json");
 
 // 官方文档：https://github.com/ccxt/ccxt
 const ccxt = require("ccxt");
@@ -22,7 +23,7 @@ let exchange = new exchangeClass({
     secret: config.apiSecret,
     fetchImplementation: requestMethod,
     enableRateLimit: true,
-    // options: {defaultType: "future"},
+    options: {defaultType: "future"},
 });
 
 /**
@@ -40,4 +41,72 @@ function createMarketBuyOrder(symbol, amount) {
     });
 }
 
-module.exports = {exchange, createMarketBuyOrder};
+async function createBestLimitSellOrder(symbol, invest) {
+    let quantityPrecision = getQuantityPrecision(symbol);
+    let pricePrecision = getPricePrecision(symbol);
+
+    let price = await getBestPrice(symbol);
+
+    let amount = (invest / price).toFixed(quantityPrecision);
+
+    return await createLimitSellOrder(symbol, amount, price.toFixed(pricePrecision), "future");
+}
+
+async function createBestLimitBuyOrder(symbol, invest) {
+    let quantityPrecision = getQuantityPrecision(symbol);
+    let pricePrecision = getPricePrecision(symbol);
+
+    let price = await getBestPrice(symbol);
+
+    let amount = (invest / price).toFixed(quantityPrecision);
+
+    return await createLimitBuyOrder(symbol, amount, price.toFixed(pricePrecision), "future");
+}
+
+/**
+ * 获取最优价格
+ * @param symbol
+ * @returns {Promise<number>}
+ */
+async function getBestPrice(symbol) {
+    let ticker = await exchange.fapiPublicGetTickerBookTicker({symbol});
+
+    let ask = Number(ticker.askPrice);
+    let bid = Number(ticker.bidPrice);
+    return (ask + bid) / 2;
+}
+
+function getQuantityPrecision(symbol) {
+    let exchangeInfo = fetchFutureExchangeInfo();
+
+    return Number(exchangeInfo.symbols.find((coin) => {
+        return coin.symbol.toLowerCase() === symbol.toLowerCase();
+    }).quantityPrecision);
+}
+
+function getPricePrecision(symbol) {
+    let exchangeInfo = fetchFutureExchangeInfo();
+
+    return Number(exchangeInfo.symbols.find((coin) => {
+        return coin.symbol === symbol;
+    }).pricePrecision);
+}
+
+function fetchFutureExchangeInfo() {
+    return exchangeInfo;
+    // return gridAccount.fapiPublicGetExchangeInfo();
+}
+
+async function createLimitBuyOrder(symbol, amount, price, type) {
+    return exchange.createLimitBuyOrder(symbol, amount, price, {
+        type,
+    });
+}
+
+async function createLimitSellOrder(symbol, amount, price, type) {
+    return exchange.createLimitSellOrder(symbol, amount, price, {
+        type,
+    });
+}
+
+module.exports = {exchange, createBestLimitSellOrder, createBestLimitBuyOrder};
