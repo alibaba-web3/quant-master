@@ -12,52 +12,71 @@ symbol = "UNI"
 # 手续费
 fee = 0.0004
 
-# 返回当前文件路径
-root_path = os.path.abspath(os.path.dirname(__file__))
 
-# 读取所有现货数据
-spotPath = root_path + '/data/spot_1d.csv'
-profitPath = root_path + '/data/profit_1d.csv'
+# 读取整理数据
+def read_data():
+    # 返回当前文件路径
+    root_path = os.path.abspath(os.path.dirname(__file__))
 
-spotDf = pd.read_csv(spotPath, encoding='utf-8', skiprows=0)
-profitDf = pd.read_csv(profitPath, encoding='utf-8', skiprows=0)
+    # 读取所有现货数据
+    spotPath = root_path + '/data/spot_1d.csv'
+    profitPath = root_path + '/data/profit_1d.csv'
 
-profitDf = profitDf[profitDf["symbol"] == symbol]
-profitDf = profitDf.sort_values(by=['date'])
+    spotDf = pd.read_csv(spotPath, encoding='utf-8', skiprows=0)
+    profitDf = pd.read_csv(profitPath, encoding='utf-8', skiprows=0)
 
-profitDf["symbol"] = profitDf[["symbol"]].apply(lambda x: x + "USDT")
-profitDf["date"] = pd.to_datetime(profitDf["date"]).dt.date
+    profitDf = profitDf[profitDf["symbol"] == symbol]
+    profitDf = profitDf.sort_values(by=['date'])
 
-spotDf = spotDf[spotDf["symbol"] == symbol + "USDT"]
-spotDf["date"] = pd.to_datetime(spotDf["openTime"]).dt.date
+    profitDf["symbol"] = profitDf[["symbol"]].apply(lambda x: x + "USDT")
+    profitDf["date"] = pd.to_datetime(profitDf["date"]).dt.date
 
-# 删除不需要的数据
-spotDf.drop(
-    columns=['buyingTurnover', 'buyingVolume', 'openTime', 'closeTime', 'tradingVolume', 'turnover', 'volume'],
-    inplace=True)
-# profitDf.drop(columns=['contract_address', 'time'], inplace=True)
+    spotDf = spotDf[spotDf["symbol"] == symbol + "USDT"]
+    spotDf["date"] = pd.to_datetime(spotDf["openTime"]).dt.date
 
-# 合约调用数据和价格数据整理
-df = pd.merge(spotDf, profitDf, on=["date", "symbol"])
+    # 删除不需要的数据
+    spotDf.drop(
+        columns=['buyingTurnover', 'buyingVolume', 'openTime', 'closeTime', 'tradingVolume', 'turnover', 'volume'],
+        inplace=True)
 
-# 回测策略：协议手续费 上升时买入并持有 1 天
-df["feeUp"] = df["total_fees"] - df["total_fees"].shift(-1)
-df.dropna(axis=0, how='any', inplace=True)
-df["当天投资"] = df[["feeUp"]].iloc[:, 0].apply(lambda x: 100 if x > 0 else 0)
+    # 合约利润数据和价格数据整理
+    df = pd.merge(spotDf, profitDf, on=["date", "symbol"])
+    return df
 
-df.loc[df['feeUp'] >= 0, '当天投资'] = 100
-df.loc[df['feeUp'] < 0, '当天投资'] = 0
 
-df.loc[df['当天投资'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"] - fee * 2
+# 策略实现
+def strategy(df):
+    # 回测策略：协议手续费 上升时买入并持有 1 天
+    df["feeUp"] = df["total_fees"] - df["total_fees"].shift(-1)
+    df.dropna(axis=0, how='any', inplace=True)
+    df["当天投资"] = df[["feeUp"]].iloc[:, 0].apply(lambda x: 100 if x > 0 else 0)
 
-df["累计投资"] = df["当天投资"].cumsum()
-df["revenueRate"] = df["本次盈亏"].cumsum()
+    df.loc[df['feeUp'] >= 0, '当天投资'] = 100
+    df.loc[df['feeUp'] < 0, '当天投资'] = 0
 
-# 补充空缺的数据
-df["revenueRate"] = df["revenueRate"].fillna(method='pad')
+    df.loc[df['当天投资'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"] - fee * 2
 
-analyze_strategy(df)
+    df["累计投资"] = df["当天投资"].cumsum()
+    df["revenueRate"] = df["本次盈亏"].cumsum()
 
-# 资金曲线
-df.plot('date', y=['revenueRate'])
-plt.show()
+    # 补充空缺的数据
+    df["revenueRate"] = df["revenueRate"].fillna(method='pad')
+    return df
+
+
+def main():
+    # TVL 数据和价格数据整理
+    df = read_data()
+
+    # 回测策略：协议手续费 上升时买入并持有 1 天
+    df = strategy(df)
+
+    # 策略分析
+    analyze_strategy(df)
+
+    # 资金曲线
+    df.plot('date', y=['revenueRate'])
+    plt.show()
+
+
+main()
