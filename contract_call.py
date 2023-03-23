@@ -50,14 +50,14 @@ def strategy(df):
     # 回测策略：TVL 相比昨天上升则买入并持有 1 天
     df["transferUp"] = df["transfer_count"] - df["transfer_count"].shift(-1)
     df.dropna(axis=0, how='any', inplace=True)
-    df["当天投资"] = df[["transferUp"]].iloc[:, 0].apply(lambda x: 100 if x > 0 else 0)
+    df["invest"] = df[["transferUp"]].iloc[:, 0].apply(lambda x: 100 if x > 0 else 0)
 
-    df.loc[df['transferUp'] >= 0, '当天投资'] = 100
-    df.loc[df['transferUp'] < 0, '当天投资'] = 0
+    df.loc[df['transferUp'] >= 0, 'invest'] = 100
+    df.loc[df['transferUp'] < 0, 'invest'] = 0
 
-    df.loc[df['当天投资'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"] - fee * 2
+    df.loc[df['invest'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"] - fee * 2
 
-    df["累计投资"] = df["当天投资"].cumsum()
+    df["totalInvest"] = df["invest"].cumsum()
     df["revenueRate"] = df["本次盈亏"].cumsum()
 
     # 补充空缺的数据

@@ -48,12 +48,12 @@ def strategy(df):
     df["tvl变化"] = df["tvl"] - df["tvl"].shift(-1)
     df.dropna(axis=0, how='any', inplace=True)
 
-    df.loc[df['tvl变化'] <= 0, '当天投资'] = 0
-    df.loc[df['tvl变化'] > 0, '当天投资'] = invest
+    df.loc[df['tvl变化'] <= 0, 'invest'] = 0
+    df.loc[df['tvl变化'] > 0, 'invest'] = invest
 
-    df.loc[df['当天投资'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"]
+    df.loc[df['invest'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"]
 
-    df["累计投资"] = df["当天投资"].cumsum()
+    df["totalInvest"] = df["invest"].cumsum()
     df["revenueRate"] = df["本次盈亏"].cumsum()
 
     # 补充空缺的数据

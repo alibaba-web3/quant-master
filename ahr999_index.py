@@ -54,13 +54,13 @@ def strategy(df):
             return 0
         return index * index - 2.983 * index + 3.14
 
-    df["当天投资"] = df['ahr999'].apply(lambda x: base_invest * get_factor(x))
-    df["当天买入BTC"] = df[["当天投资", "open"]].apply(lambda x: x["当天投资"] / x["open"], axis=1)
+    df["invest"] = df['ahr999'].apply(lambda x: base_invest * get_factor(x))
+    df["当天买入BTC"] = df[["invest", "open"]].apply(lambda x: x["invest"] / x["open"], axis=1)
     df["累计BTC"] = df["当天买入BTC"].cumsum()
-    df["累计投资"] = df["当天投资"].cumsum()
+    df["totalInvest"] = df["invest"].cumsum()
     df["balance"] = df[["累计BTC", "close"]].apply(lambda x: x["累计BTC"] * x["close"], axis=1)
-    df['revenue'] = df[["balance", "累计投资"]].apply(lambda x: x["balance"] - x["累计投资"], axis=1)
-    df["revenueRate"] = df[["revenue", "累计投资"]].apply(lambda x: x["revenue"] / x["累计投资"], axis=1)
+    df['revenue'] = df[["balance", "totalInvest"]].apply(lambda x: x["balance"] - x["totalInvest"], axis=1)
+    df["revenueRate"] = df[["revenue", "totalInvest"]].apply(lambda x: x["revenue"] / x["totalInvest"], axis=1)
     return df
 
 
