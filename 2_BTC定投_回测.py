@@ -33,13 +33,13 @@ def read_data():
 # 策略实现
 def strategy(df):
     # 回测策略：BTC 定投
-    df["当天投资"] = invest
+    df["invest"] = invest
     df["当天买入BTC"] = df[["open"]].apply(lambda x: invest / x["open"], axis=1)
     df["累计BTC"] = df["当天买入BTC"].cumsum()
-    df["累计投资"] = df["当天投资"].cumsum()
+    df["totalInvest"] = df["invest"].cumsum()
     df["balance"] = df[["累计BTC", "close"]].apply(lambda x: x["累计BTC"] * x["close"], axis=1)
-    df['revenue'] = df[["balance", "累计投资"]].apply(lambda x: x["balance"] - x["累计投资"], axis=1)
-    df["revenueRate"] = df[["revenue", "累计投资"]].apply(lambda x: x["revenue"] / x["累计投资"], axis=1)
+    df['revenue'] = df[["balance", "totalInvest"]].apply(lambda x: x["balance"] - x["totalInvest"], axis=1)
+    df["revenueRate"] = df[["revenue", "totalInvest"]].apply(lambda x: x["revenue"] / x["totalInvest"], axis=1)
     df["date"] = pd.to_datetime(df["openTime"]).dt.date
 
 

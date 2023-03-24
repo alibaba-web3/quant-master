@@ -13,3 +13,5 @@ pandas 字段约定：
 date: 日期
 balance: 账户余额
 revenueRate: 总收益率
+invest: 当天投入
+totalInvest 累计投入
