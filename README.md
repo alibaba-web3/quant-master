@@ -15,3 +15,4 @@ balance: 账户余额
 revenueRate: 总收益率
 invest: 当天投入
 totalInvest 累计投入
+currentRevenueRate 本次交易收益率

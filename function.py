@@ -3,8 +3,8 @@ import numpy as np
 
 def analyze_strategy(df):
     # 计算最大回撤
-    df['maxRevenueRate'] = df['revenueRate'].cummax()
-    df['drawdown'] = df['revenueRate'] - df['maxRevenueRate']
+    df['cumulative_max'] = df['revenueRate'].expanding().max()
+    df['drawdown'] = (df['revenueRate'] - df['cumulative_max']) / df['cumulative_max']
     max_drawdown = df['drawdown'].min() * 100
 
     # 计算策略年化收益率

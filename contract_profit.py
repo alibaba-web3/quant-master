@@ -54,10 +54,10 @@ def strategy(df):
     df.loc[df['feeUp'] >= 0, 'invest'] = 100
     df.loc[df['feeUp'] < 0, 'invest'] = 0
 
-    df.loc[df['invest'] > 0, '本次盈亏'] = (df["close"].shift(-1) - df["close"]) / df["close"] - fee * 2
+    df.loc[df['invest'] > 0, 'currentRevenueRate'] = (df["close"].shift(-1) - df["close"]) / df["close"] - fee * 2
 
     df["totalInvest"] = df["invest"].cumsum()
-    df["revenueRate"] = df["本次盈亏"].cumsum()
+    df["revenueRate"] = df["currentRevenueRate"].cumsum()
 
     # 补充空缺的数据
     df["revenueRate"] = df["revenueRate"].fillna(method='pad')
