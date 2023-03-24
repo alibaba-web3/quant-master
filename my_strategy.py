@@ -17,7 +17,7 @@ df.drop(
     columns=['buyingTurnover', 'buyingVolume', 'closeTime', 'tradingVolume', 'turnover', 'volume'],
     inplace=True)
 
-# 保留 ETH 数据
+# 保留 ETH 的数据
 df = df[df['symbol'] == 'BTCUSDT']
 
 # 初始投资金额
