@@ -1,15 +1,9 @@
-const ccxt = require('ccxt');
 const SMA = require('technicalindicators').SMA;
-const cron = require('node-cron');
-
-const exchange = new ccxt.binance({
-    apiKey: 'your_API_key',
-    secret: 'your_API_secret'
-});
+const {exchange} = require("./function.js");
 
 let smaShortPeriod = 5;
 let smaLongPeriod = 20;
-let symbol = 'BTC/ETH';
+let symbol = 'BTC/USDT';
 let balance = {};
 
 async function fetchOHLCV() {
@@ -19,8 +13,8 @@ async function fetchOHLCV() {
 }
 
 async function calculateSMA(closePrices) {
-    let smaShort = SMA.calculate({period : smaShortPeriod, values : closePrices});
-    let smaLong = SMA.calculate({period : smaLongPeriod, values : closePrices});
+    let smaShort = SMA.calculate({period: smaShortPeriod, values: closePrices});
+    let smaLong = SMA.calculate({period: smaLongPeriod, values: closePrices});
 
     return {
         smaShort: smaShort,
@@ -37,7 +31,7 @@ async function placeOrder(type, amount) {
     return order;
 }
 
-async function main() {
+async function ema() {
     await updateBalance();
 
     let closePrices = await fetchOHLCV();
@@ -46,18 +40,32 @@ async function main() {
     let lastSmaShort = smaShort[smaShort.length - 1];
     let lastSmaLong = smaLong[smaLong.length - 1];
 
+    // TODO 如果有之前仓位，先平仓
+
     if (lastSmaShort > lastSmaLong) {
         console.log('Placing buy order...');
         // Calculate amount based on your balance and strategy
         let amountToBuy = balance.free.BTC / 2;
-        await placeOrder('buy', amountToBuy);
+        // await placeOrder('buy', amountToBuy);
     } else if (lastSmaShort < lastSmaLong) {
         console.log('Placing sell order...');
         // Calculate amount based on your balance and strategy
         let amountToSell = balance.free.BTC;
-        await placeOrder('sell', amountToSell);
+        // await placeOrder('sell', amountToSell);
+    } else {
+        console.log('Nothing to do...');
     }
 }
 
-// Schedule the main function to run once a day at 00:00
-cron.schedule('0 0 * * *', main);
+async function main() {
+    while (true) {
+        console.log("start");
+        await ema();
+        // 每天执行一次
+        await new Promise(resolve => setTimeout(resolve, 1000 * 60 * 60 * 24));
+    }
+
+}
+
+main();
+
