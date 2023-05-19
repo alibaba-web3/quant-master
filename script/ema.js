@@ -1,17 +1,36 @@
 const SMA = require('technicalindicators').SMA;
-const {exchange} = require("./function.js");
+const {
+    exchange,
+    sleep,
+    createBestLimitBuyOrderUntilFilled,
+    createBestLimitSellOrderUntilFilled
+} = require("./function.js");
 
+// 下单金额
+let invest = 100;
+// 短均线周期
 let smaShortPeriod = 5;
+// 长均线周期
 let smaLongPeriod = 20;
 let symbol = 'BTC/USDT';
-let balance = {};
 
+// exchange.fetchTickers().then(async markets => {
+//     console.log(markets);
+// });
+
+/**
+ * 查询收盘 k 线价格
+ * @returns {Promise<number[]>}
+ */
 async function fetchOHLCV() {
     let ohlcv = await exchange.fetchOHLCV(symbol, '1d');
-    let closePrices = ohlcv.map(x => x[4]); // Closing prices
-    return closePrices;
+    // 收盘价
+    return ohlcv.map(x => x[4]);
 }
 
+/**
+ * 计算双均线
+ */
 async function calculateSMA(closePrices) {
     let smaShort = SMA.calculate({period: smaShortPeriod, values: closePrices});
     let smaLong = SMA.calculate({period: smaLongPeriod, values: closePrices});
@@ -22,17 +41,7 @@ async function calculateSMA(closePrices) {
     };
 }
 
-async function updateBalance() {
-    balance = await exchange.fetchBalance();
-}
-
-async function placeOrder(type, amount) {
-    let order = await exchange.createOrder(symbol, 'market', type, amount);
-    return order;
-}
-
 async function ema() {
-    await updateBalance();
 
     let closePrices = await fetchOHLCV();
     let {smaShort, smaLong} = await calculateSMA(closePrices);
@@ -40,31 +49,56 @@ async function ema() {
     let lastSmaShort = smaShort[smaShort.length - 1];
     let lastSmaLong = smaLong[smaLong.length - 1];
 
-    // TODO 如果有之前仓位，先平仓
-
+    let positions = await exchange.fetchPositions();
+    positions = positions.filter(x => x.notional !== 0);
     if (lastSmaShort > lastSmaLong) {
-        console.log('Placing buy order...');
-        // Calculate amount based on your balance and strategy
-        let amountToBuy = balance.free.BTC / 2;
-        // await placeOrder('buy', amountToBuy);
+        console.log(`${symbol} 短均线大于长均线，做多`);
+
+        let position = positions.find(x => x.symbol === symbol);
+
+        if (position && position.notional > 0) {
+            console.log(`${symbol} 已有仓位，不再做多`);
+        } else if (position && position.notional < 0) {
+            console.log(`${symbol} 已有仓位，平仓`);
+            await createBestLimitSellOrderUntilFilled(symbol, invest);
+            await createBestLimitBuyOrderUntilFilled(symbol, invest);
+        } else {
+            await createBestLimitBuyOrderUntilFilled(symbol, invest);
+        }
+
     } else if (lastSmaShort < lastSmaLong) {
-        console.log('Placing sell order...');
-        // Calculate amount based on your balance and strategy
-        let amountToSell = balance.free.BTC;
-        // await placeOrder('sell', amountToSell);
+        console.log(`${symbol} 短均线小于长均线，做空`);
+        let position = positions.find(x => x.symbol === symbol);
+
+        if (position && position.notional < 0) {
+            console.log(`${symbol} 已有仓位，不再做空`);
+
+        } else if (position && position.notional > 0) {
+            console.log(`${symbol} 已有仓位，平仓`);
+            await createBestLimitBuyOrderUntilFilled(symbol, invest);
+            await createBestLimitSellOrderUntilFilled(symbol, invest);
+        } else {
+            await createBestLimitSellOrderUntilFilled(symbol, invest);
+        }
     } else {
         console.log('Nothing to do...');
     }
 }
 
 async function main() {
+
+    // 加载市场
+    await exchange.loadMarkets();
+
     while (true) {
         console.log("start");
         await ema();
         // 每天执行一次
-        await new Promise(resolve => setTimeout(resolve, 1000 * 60 * 60 * 24));
-    }
+        await sleep(1000 * 60 * 60 * 24);
 
+        // 测试使用
+        // await sleep(1000);
+    }
 }
 
 main();
