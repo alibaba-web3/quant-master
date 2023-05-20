@@ -12,18 +12,18 @@ let invest = 100;
 let smaShortPeriod = 5;
 // 长均线周期
 let smaLongPeriod = 20;
-let symbol = 'BTC/USDT';
+// k 线级别
+let timeframe = '1d';
+// 交易对
+let symbol = 'BTCUSDT';
 
-// exchange.fetchTickers().then(async markets => {
-//     console.log(markets);
-// });
 
 /**
  * 查询收盘 k 线价格
  * @returns {Promise<number[]>}
  */
 async function fetchOHLCV() {
-    let ohlcv = await exchange.fetchOHLCV(symbol, '1d');
+    let ohlcv = await exchange.fetchOHLCV(symbol, timeframe);
     // 收盘价
     return ohlcv.map(x => x[4]);
 }
@@ -81,7 +81,7 @@ async function ema() {
             await createBestLimitSellOrderUntilFilled(symbol, invest);
         }
     } else {
-        console.log('Nothing to do...');
+        console.log('均线相等，不做操作');
     }
 }
 
@@ -92,7 +92,13 @@ async function main() {
 
     while (true) {
         console.log("start");
-        await ema();
+        try {
+            await ema();
+        } catch (e) {
+            console.error("均线策略异常", e);
+            break;
+        }
+
         // 每天执行一次
         await sleep(1000 * 60 * 60 * 24);
 
