@@ -14,33 +14,66 @@ exchange = ccxt.binance({
     'options': {'defaultType': 'future'},
 })
 
-def save_binance_data(symbol, timeframe, since=None, to_path='./data/binance/1d'):
+
+def save_binance_data(symbol, timeframe, to_path='./data/binance/1d'):
+    # 检查目标文件夹是否存在
     if not os.path.exists(to_path):
         os.makedirs(to_path)
 
-    bars = fetch_all_ohlcv(symbol, timeframe)
-    df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
+    # 检查历史数据文件是否存在
+    to_path = os.path.join(to_path, timeframe, f"{symbol.replace('/', '-')}-{timeframe}.csv")
 
-    output_path = os.path.join(to_path, f"{symbol.replace('/', '-')}-{timeframe}.csv")
-    df.to_csv(output_path)
-    print(f"{symbol} data saved to {output_path}")
+    if os.path.isfile(to_path):
+        # 如果文件存在，则加载已有数据
+        local_df = pd.read_csv(to_path, index_col='timestamp', parse_dates=True)
+        # 获取已有数据的最后时间戳，并更新起始时间
+        last_timestamp = int(local_df.index[-1].timestamp() * 1000)
+        start_time = last_timestamp + 1
+
+        bars = fetch_all_ohlcv(symbol, timeframe, start_time)
+        df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+        # 合并本地数据和新获取的数据
+        df = pd.concat([local_df, df])
+
+        df.to_csv(to_path)
+        print(f"{symbol} data saved to {to_path}")
+    else:
+        bars = fetch_all_ohlcv(symbol, timeframe)
+        df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+
+        df.to_csv(to_path)
+        print(f"{symbol} data saved to {to_path}")
 
 
 def download_all_binance_data(timeframe, to_path='./data/binance/'):
     markets = exchange.load_markets()
     symbols = [symbol for symbol in markets if
-               markets[symbol]['info']['quoteAsset'] == 'USDT' and markets[symbol]['info']['contractType'] == 'PERPETUAL']
+               markets[symbol]['info']['quoteAsset'] == 'USDT' and markets[symbol]['info'][
+                   'contractType'] == 'PERPETUAL']
 
-    to_path = os.path.join(to_path, timeframe)
-    for index, symbol in enumerate(symbols):
-        print(f"Current iteration: {index + 1}/{len(symbols)}")
-        save_binance_data(symbol, timeframe, to_path=to_path)
+    to_path = os.path.abspath(to_path)
+    # for index, symbol in enumerate(symbols):
+    #     print(f"Current iteration: {index + 1}/{len(symbols)}")
+    #
+    #     save_binance_data(symbol, timeframe, to_path=to_path)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = {executor.submit(save_binance_data, symbol, timeframe, to_path=to_path): symbol for symbol in symbols}
+
+        for future in concurrent.futures.as_completed(futures):
+            symbol = futures[future]
+            try:
+                print(f"Completed download for {symbol}")
+            except Exception as exc:
+                print(f"Generated an exception for {symbol}: {exc}")
 
 
-def fetch_all_ohlcv(symbol, timeframe):
-    start_time = 1514764800000  # 2018年1月1日 00:00:00的时间戳（毫秒）
+def fetch_all_ohlcv(symbol, timeframe, start_time=1514764800000):
+    # 2018年1月1日 00:00:00的时间戳（毫秒）
 
     # 初始化空的DataFrame
     df = pd.DataFrame()
@@ -54,19 +87,19 @@ def fetch_all_ohlcv(symbol, timeframe):
         if len(klines) == 0:
             return df
 
+        start_time = klines[-1][0] + 1
+
         # 转换为DataFrame格式
         klines_df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-
         # 转换时间戳为日期时间
         klines_df['timestamp'] = pd.to_datetime(klines_df['timestamp'], unit='ms')
+        print("获取 {} k 线数据，时间段：{} - {}".format(symbol, klines_df['timestamp'].iloc[0], klines_df['timestamp'].iloc[-1]))
 
         # 将数据添加到总的DataFrame中
         df = pd.concat([df, klines_df])
 
         if len(klines) < limit:
             return df
-
-        return df
 
 
 if __name__ == "__main__":

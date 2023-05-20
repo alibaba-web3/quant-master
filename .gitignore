@@ -1,5 +1,6 @@
 data/**.csv
 data/**.json
+data/**/**.csv
 .idea/
 script/config.json
 script/node_modules/
