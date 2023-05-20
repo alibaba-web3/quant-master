@@ -8,7 +8,7 @@ const {
 const {createBestLimitSellOrderByAmountUntilFilled, createBestLimitBuyOrderByAmountUntilFilled} = require("./function");
 
 // 下单金额
-let invest = 100;
+let invest = 50;
 // 短均线周期
 let smaShortPeriod = 5;
 // 长均线周期
@@ -57,13 +57,14 @@ async function ema() {
     if (lastSmaShort > lastSmaLong) {
         console.log(`${symbol} 短均线大于长均线，做多`);
 
-        let position = positions.find(x => x.symbol === symbol);
+        let position = positions.find(x => x.info.symbol === symbol);
 
         if (position && position.notional > 0) {
             console.log(`${symbol} 已有仓位，不再做多`);
         } else if (position && position.notional < 0) {
             console.log(`${symbol} 已有仓位，平仓`);
-            await createBestLimitBuyOrderByAmountUntilFilled(symbol, position.notional);
+            let amount = Math.abs(position.info.positionAmt);
+            await createBestLimitBuyOrderByAmountUntilFilled(symbol, amount);
             await createBestLimitBuyOrderUntilFilled(symbol, invest);
         } else {
             await createBestLimitBuyOrderUntilFilled(symbol, invest);
@@ -75,10 +76,10 @@ async function ema() {
 
         if (position && position.notional < 0) {
             console.log(`${symbol} 已有仓位，不再做空`);
-
         } else if (position && position.notional > 0) {
             console.log(`${symbol} 已有仓位，平仓`);
-            await createBestLimitSellOrderByAmountUntilFilled(symbol, position.notional);
+            let amount = Math.abs(position.info.positionAmt);
+            await createBestLimitSellOrderByAmountUntilFilled(symbol, amount);
             await createBestLimitSellOrderUntilFilled(symbol, invest);
         } else {
             await createBestLimitSellOrderUntilFilled(symbol, invest);
