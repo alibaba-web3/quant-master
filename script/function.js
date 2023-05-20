@@ -97,13 +97,13 @@ async function createLimitBuyOrder(symbol, amount, price) {
     try {
         return await exchange.createLimitBuyOrder(symbol, amount, price);
     } catch (error) {
-        if (error instanceof exchange.ExchangeNotAvailable) {
+        if (error instanceof ccxt.ExchangeNotAvailable) {
             await sleep(1000);
             try {
                 // 重试
                 return await exchange.createLimitBuyOrder(symbol, amount, price);
             } catch (e) {
-                if (e instanceof exchange.ExchangeNotAvailable) {
+                if (e instanceof ccxt.ExchangeNotAvailable) {
                     await sleep(1000);
                     // 二次重试
                     return await exchange.createLimitBuyOrder(symbol, amount, price);
@@ -126,13 +126,13 @@ async function createLimitSellOrder(symbol, amount, price) {
     try {
         return await exchange.createLimitSellOrder(symbol, amount, price);
     } catch (error) {
-        if (error instanceof exchange.ExchangeNotAvailable) {
+        if (error instanceof ccxt.ExchangeNotAvailable) {
             await sleep(1000);
             try {
                 // 重试
                 return await exchange.createLimitSellOrder(symbol, amount, price);
             } catch (e) {
-                if (e instanceof exchange.ExchangeNotAvailable) {
+                if (e instanceof ccxt.ExchangeNotAvailable) {
                     await sleep(1000);
                     // 二次重试
                     return await exchange.createLimitSellOrder(symbol, amount, price);
@@ -155,12 +155,24 @@ async function sleep(ms) {
 // 最佳买单直到成交
 async function createBestLimitBuyOrderUntilFilled(symbol, invest) {
     let order = await createBestLimitBuyOrder(symbol, invest);
+
+    return await checkBuyOrder(order);
+}
+
+// 按照数量下单最佳买单直到成交
+async function createBestLimitBuyOrderByAmountUntilFilled(symbol, amount) {
+    let order = await createBestLimitBuyOrderByAmount(symbol, amount);
+
+    return await checkBuyOrder(order);
+}
+
+async function checkBuyOrder(order) {
     let num = 0;
     let maxNum = 10;
 
     let intervalId = setInterval(async () => {
         num++;
-        order = await exchange.fetchOrder(order.id, symbol);
+        order = await exchange.fetchOrder(order.id, order.symbol);
 
         console.log(`做多 ${order.symbol} 检查订单 ${order.id} 是否成交`, num);
 
@@ -171,8 +183,8 @@ async function createBestLimitBuyOrderUntilFilled(symbol, invest) {
 
         if (num > maxNum) {
             console.log(`做多 ${order.symbol} 订单 ${order.id} 未完全成交，取消后重新下单`);
-            await cancelOrder(symbol, order.id);
-            order = await createBestLimitBuyOrderByAmount(symbol, order.remaining);
+            await cancelOrder(order.symbol, order.id);
+            order = await createBestLimitBuyOrderByAmount(order.symbol, order.remaining);
             num = 0;
         }
     }, 10 * 1000);
@@ -183,6 +195,18 @@ async function createBestLimitBuyOrderUntilFilled(symbol, invest) {
 // 最佳卖单直到成交
 async function createBestLimitSellOrderUntilFilled(symbol, invest) {
     let order = await createBestLimitSellOrder(symbol, invest);
+
+    return await checkSellOrder(order);
+}
+
+// 按照数量下单最佳卖单直到成交
+async function createBestLimitSellOrderByAmountUntilFilled(symbol, amount) {
+    let order = await createBestLimitSellOrderByAmount(symbol, amount);
+
+    return await checkSellOrder(order);
+}
+
+async function checkSellOrder(order) {
     let num = 0;
     let maxNum = 10;
 
@@ -225,5 +249,7 @@ module.exports = {
     createBestLimitBuyOrder,
     createMarketBuyOrder,
     createBestLimitBuyOrderUntilFilled,
-    createBestLimitBuyOrderByAmount
+    createBestLimitBuyOrderByAmount,
+    createBestLimitBuyOrderByAmountUntilFilled,
+    createBestLimitSellOrderByAmountUntilFilled
 };

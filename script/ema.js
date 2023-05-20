@@ -5,6 +5,7 @@ const {
     createBestLimitBuyOrderUntilFilled,
     createBestLimitSellOrderUntilFilled
 } = require("./function.js");
+const {createBestLimitSellOrderByAmountUntilFilled, createBestLimitBuyOrderByAmountUntilFilled} = require("./function");
 
 // 下单金额
 let invest = 100;
@@ -13,7 +14,7 @@ let smaShortPeriod = 5;
 // 长均线周期
 let smaLongPeriod = 20;
 // k 线级别
-let timeframe = '1d';
+let timeframe = '1h';
 // 交易对
 let symbol = 'BTCUSDT';
 
@@ -48,9 +49,11 @@ async function ema() {
 
     let lastSmaShort = smaShort[smaShort.length - 1];
     let lastSmaLong = smaLong[smaLong.length - 1];
+    console.log(`交易对 ${symbol} ${timeframe} 均线 ${smaShortPeriod} ${smaLongPeriod} 最新值 ${lastSmaShort} ${lastSmaLong}`);
 
     let positions = await exchange.fetchPositions();
     positions = positions.filter(x => x.notional !== 0);
+
     if (lastSmaShort > lastSmaLong) {
         console.log(`${symbol} 短均线大于长均线，做多`);
 
@@ -60,7 +63,7 @@ async function ema() {
             console.log(`${symbol} 已有仓位，不再做多`);
         } else if (position && position.notional < 0) {
             console.log(`${symbol} 已有仓位，平仓`);
-            await createBestLimitSellOrderUntilFilled(symbol, invest);
+            await createBestLimitBuyOrderByAmountUntilFilled(symbol, position.notional);
             await createBestLimitBuyOrderUntilFilled(symbol, invest);
         } else {
             await createBestLimitBuyOrderUntilFilled(symbol, invest);
@@ -75,7 +78,7 @@ async function ema() {
 
         } else if (position && position.notional > 0) {
             console.log(`${symbol} 已有仓位，平仓`);
-            await createBestLimitBuyOrderUntilFilled(symbol, invest);
+            await createBestLimitSellOrderByAmountUntilFilled(symbol, position.notional);
             await createBestLimitSellOrderUntilFilled(symbol, invest);
         } else {
             await createBestLimitSellOrderUntilFilled(symbol, invest);
@@ -100,7 +103,7 @@ async function main() {
         }
 
         // 每天执行一次
-        await sleep(1000 * 60 * 60 * 24);
+        await sleep(1000 * 60 * 60);
 
         // 测试使用
         // await sleep(1000);
