@@ -32,6 +32,11 @@ def save_binance_data(symbol, timeframe, to_path='./data/binance/1d'):
 
         bars = fetch_all_ohlcv(symbol, timeframe, start_time)
         df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        # 没有新数据，直接返回
+        if df.empty:
+            print(f"{symbol} no new data")
+            return
+
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df.set_index('timestamp', inplace=True)
         # 合并本地数据和新获取的数据
