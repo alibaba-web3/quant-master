@@ -82,10 +82,10 @@ async function createBestLimitBuyOrderByAmount(symbol, amount) {
  * @returns {Promise<number>}
  */
 async function getBestPrice(symbol) {
-    let ticker = await exchange.fetchTicker(symbol);
-
-    let ask = ticker.ask;
-    let bid = ticker.bid;
+    let ticker = await exchange.fetchOrderBook(symbol, 5);
+    console.log(ticker);
+    let bid = ticker.bids[0][0];
+    let ask = ticker.asks[0][0];
     return (ask + bid) / 2;
 }
 
@@ -252,5 +252,6 @@ module.exports = {
     createBestLimitBuyOrderUntilFilled,
     createBestLimitBuyOrderByAmount,
     createBestLimitBuyOrderByAmountUntilFilled,
-    createBestLimitSellOrderByAmountUntilFilled
+    createBestLimitSellOrderByAmountUntilFilled,
+    getBestPrice
 };
