@@ -51,15 +51,14 @@ async function ema(symbol) {
 
     let positions = await exchange.fetchPositions();
     positions = positions.filter(x => x.notional !== 0);
+    let position = positions.find(x => x.info.symbol === symbol);
 
     if (lastSmaShort > lastSmaLong) {
         console.log(`${symbol} 短均线大于长均线，做多`);
 
-        let position = positions.find(x => x.info.symbol === symbol);
-
-        if (position && position.notional > 0) {
+        if (position && Number(position.info.positionAmt) > 0) {
             console.log(`${symbol} 已有仓位，不再做多`);
-        } else if (position && position.notional < 0) {
+        } else if (position && Number(position.info.positionAmt) < 0) {
             console.log(`${symbol} 已有仓位，平仓`);
             let amount = Math.abs(position.info.positionAmt);
             await createBestLimitBuyOrderByAmountUntilFilled(symbol, amount);
@@ -70,11 +69,10 @@ async function ema(symbol) {
 
     } else if (lastSmaShort < lastSmaLong) {
         console.log(`${symbol} 短均线小于长均线，做空`);
-        let position = positions.find(x => x.symbol === symbol);
 
-        if (position && position.notional < 0) {
+        if (position && Number(position.info.positionAmt) < 0) {
             console.log(`${symbol} 已有仓位，不再做空`);
-        } else if (position && position.notional > 0) {
+        } else if (position && Number(position.info.positionAmt) > 0) {
             console.log(`${symbol} 已有仓位，平仓`);
             let amount = Math.abs(position.info.positionAmt);
             await createBestLimitSellOrderByAmountUntilFilled(symbol, amount);
