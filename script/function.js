@@ -82,10 +82,10 @@ async function createBestLimitBuyOrderByAmount(symbol, amount) {
  * @returns {Promise<number>}
  */
 async function getBestPrice(symbol) {
-    let ticker = await exchange.fapiPublicGetTickerBookTicker({symbol});
+    let ticker = await exchange.fetchTicker(symbol);
 
-    let ask = Number(ticker.askPrice);
-    let bid = Number(ticker.bidPrice);
+    let ask = ticker.ask;
+    let bid = ticker.bid;
     return (ask + bid) / 2;
 }
 
