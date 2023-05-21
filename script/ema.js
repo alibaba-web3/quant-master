@@ -15,15 +15,13 @@ let smaShortPeriod = 5;
 let smaLongPeriod = 20;
 // k 线级别
 let timeframe = '1h';
-// 交易对
-let symbol = 'BTCUSDT';
 
 
 /**
  * 查询收盘 k 线价格
  * @returns {Promise<number[]>}
  */
-async function fetchOHLCV() {
+async function fetchOHLCV(symbol) {
     let ohlcv = await exchange.fetchOHLCV(symbol, timeframe);
     // 收盘价
     return ohlcv.map(x => x[4]);
@@ -42,9 +40,9 @@ async function calculateSMA(closePrices) {
     };
 }
 
-async function ema() {
+async function ema(symbol) {
 
-    let closePrices = await fetchOHLCV();
+    let closePrices = await fetchOHLCV(symbol);
     let {smaShort, smaLong} = await calculateSMA(closePrices);
 
     let lastSmaShort = smaShort[smaShort.length - 1];
@@ -97,13 +95,13 @@ async function main() {
     while (true) {
         console.log("start");
         try {
-            await ema();
+            await ema('BTCUSDT');
         } catch (e) {
             console.error("均线策略异常", e);
             break;
         }
 
-        // 每天执行一次
+        // 每小时执行一次
         await sleep(1000 * 60 * 60);
 
         // 测试使用
