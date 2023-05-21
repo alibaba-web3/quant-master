@@ -224,7 +224,7 @@ async function checkSellOrder(order) {
 
         if (num > maxNum) {
             console.log(`做空 ${order.symbol} 订单 ${order.id} 未完全成交，取消后重新下单`);
-            await this.cancelOrder(symbol, order.id);
+            await cancelOrder(symbol, order.id);
             order = await createBestLimitSellOrderByAmount(symbol, order.remaining);
             num = 0;
         }
@@ -239,7 +239,7 @@ async function checkSellOrder(order) {
  * @param orderId 订单id
  */
 async function cancelOrder(symbol, orderId) {
-    console.log(`取消订单 ${orderId}`);
+    console.log(`取消 ${symbol} 订单 ${orderId}`);
     return exchange.cancelOrder(orderId, symbol);
 }
 

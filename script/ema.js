@@ -54,30 +54,28 @@ async function ema(symbol) {
     let position = positions.find(x => x.info.symbol === symbol);
 
     if (lastSmaShort > lastSmaLong) {
-        console.log(`${symbol} 短均线大于长均线，做多`);
-
         if (position && Number(position.info.positionAmt) > 0) {
             console.log(`${symbol} 已有仓位，不再做多`);
         } else if (position && Number(position.info.positionAmt) < 0) {
-            console.log(`${symbol} 已有仓位，平仓`);
+            console.log(`${symbol} 已有做空仓位，先平仓后做多`);
             let amount = Math.abs(position.info.positionAmt);
             await createBestLimitBuyOrderByAmountUntilFilled(symbol, amount);
             await createBestLimitBuyOrderUntilFilled(symbol, invest);
         } else {
+            console.log(`${symbol} 短均线大于长均线，做多`);
             await createBestLimitBuyOrderUntilFilled(symbol, invest);
         }
 
     } else if (lastSmaShort < lastSmaLong) {
-        console.log(`${symbol} 短均线小于长均线，做空`);
-
         if (position && Number(position.info.positionAmt) < 0) {
             console.log(`${symbol} 已有仓位，不再做空`);
         } else if (position && Number(position.info.positionAmt) > 0) {
-            console.log(`${symbol} 已有仓位，平仓`);
+            console.log(`${symbol} 已有做多仓位，先平仓后做空`);
             let amount = Math.abs(position.info.positionAmt);
             await createBestLimitSellOrderByAmountUntilFilled(symbol, amount);
             await createBestLimitSellOrderUntilFilled(symbol, invest);
         } else {
+            console.log(`${symbol} 短均线小于长均线，做空`);
             await createBestLimitSellOrderUntilFilled(symbol, invest);
         }
     } else {
