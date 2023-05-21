@@ -209,10 +209,11 @@ async function createBestLimitSellOrderByAmountUntilFilled(symbol, amount) {
 async function checkSellOrder(order) {
     let num = 0;
     let maxNum = 10;
+    let symbol = order.symbol;
 
     let intervalId = setInterval(async () => {
         num++;
-        order = await exchange.fetchOrder(order.id, symbol);
+        order = await exchange.fetchOrder(order.id, order.symbol);
 
         console.log(`做空 ${order.symbol} 检查订单 ${order.id} 是否成交`, num);
 
