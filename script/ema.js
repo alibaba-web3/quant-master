@@ -1,4 +1,4 @@
-const SMA = require('technicalindicators').SMA;
+const EMA = require('technicalindicators').EMA;
 const {
     exchange,
     sleep,
@@ -10,9 +10,9 @@ const {createBestLimitSellOrderByAmountUntilFilled, createBestLimitBuyOrderByAmo
 // 下单金额
 let invest = 50;
 // 短均线周期
-let smaShortPeriod = 5;
+let emaShortPeriod = 5;
 // 长均线周期
-let smaLongPeriod = 20;
+let emaLongPeriod = 20;
 // k 线级别
 let timeframe = '1h';
 
@@ -31,8 +31,8 @@ async function fetchOHLCV(symbol) {
  * 计算双均线
  */
 async function calculateSMA(closePrices) {
-    let smaShort = SMA.calculate({period: smaShortPeriod, values: closePrices});
-    let smaLong = SMA.calculate({period: smaLongPeriod, values: closePrices});
+    let smaShort = SMA.calculate({period: emaShortPeriod, values: closePrices});
+    let smaLong = SMA.calculate({period: emaLongPeriod, values: closePrices});
 
     return {
         smaShort: smaShort,

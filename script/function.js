@@ -83,7 +83,7 @@ async function createBestLimitBuyOrderByAmount(symbol, amount) {
  */
 async function getBestPrice(symbol) {
     let ticker = await exchange.fetchOrderBook(symbol, 5);
-    console.log(ticker);
+
     let bid = ticker.bids[0][0];
     let ask = ticker.asks[0][0];
     return (ask + bid) / 2;
