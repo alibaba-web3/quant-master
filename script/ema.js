@@ -40,7 +40,7 @@ async function calculateSMA(closePrices) {
     };
 }
 
-async function ema(symbol) {
+async function ema(symbol, trend = true) {
 
     let closePrices = await fetchOHLCV(symbol);
     let {smaShort, smaLong} = await calculateSMA(closePrices);
@@ -52,8 +52,20 @@ async function ema(symbol) {
     let positions = await exchange.fetchPositions();
     positions = positions.filter(x => x.notional !== 0);
     let position = positions.find(x => x.info.symbol === symbol);
+    let longCondition;
+    let shortCondition;
+    if (trend) {
+        // 趋势策略
+        longCondition = lastSmaShort > lastSmaLong;
+        shortCondition = lastSmaShort < lastSmaLong;
+    } else {
+        // 反转策略
+        longCondition = lastSmaShort < lastSmaLong;
+        shortCondition = lastSmaShort > lastSmaLong;
+    }
 
-    if (lastSmaShort > lastSmaLong) {
+
+    if (longCondition) {
         if (position && Number(position.info.positionAmt) > 0) {
             console.log(`${symbol} 已有仓位，不再做多`);
         } else if (position && Number(position.info.positionAmt) < 0) {
@@ -66,7 +78,7 @@ async function ema(symbol) {
             await createBestLimitBuyOrderUntilFilled(symbol, invest);
         }
 
-    } else if (lastSmaShort < lastSmaLong) {
+    } else if (shortCondition) {
         if (position && Number(position.info.positionAmt) < 0) {
             console.log(`${symbol} 已有仓位，不再做空`);
         } else if (position && Number(position.info.positionAmt) > 0) {
@@ -91,7 +103,7 @@ async function main() {
     while (true) {
         console.log("start");
         try {
-            await ema('BTCUSDT');
+            await ema('BTCUSDT', true);
         } catch (e) {
             console.error("均线策略异常", e);
             break;
