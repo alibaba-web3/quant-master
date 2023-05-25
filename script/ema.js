@@ -103,7 +103,15 @@ async function main() {
     while (true) {
         console.log("start");
         try {
-            await ema('BTCUSDT', true);
+            let trendSymbols = ['BTCUSDT'];
+            for (let symbol of trendSymbols) {
+                await ema(symbol, true);
+            }
+
+            let reverseSymbols = ['CRV-USDT'];
+            for (let symbol of reverseSymbols) {
+                await ema(symbol, false);
+            }
         } catch (e) {
             console.error("均线策略异常", e);
             break;
