@@ -108,7 +108,7 @@ async function main() {
                 await ema(symbol, true);
             }
 
-            let reverseSymbols = ['CRV-USDT'];
+            let reverseSymbols = ['CRVUSDT'];
             for (let symbol of reverseSymbols) {
                 await ema(symbol, false);
             }
