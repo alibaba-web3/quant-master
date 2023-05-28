@@ -30,24 +30,24 @@ async function fetchOHLCV(symbol) {
 /**
  * 计算双均线
  */
-async function calculateSMA(closePrices) {
-    let smaShort = SMA.calculate({period: emaShortPeriod, values: closePrices});
-    let smaLong = SMA.calculate({period: emaLongPeriod, values: closePrices});
+async function calculateEMA(closePrices) {
+    let emaShort = EMA.calculate({period: emaShortPeriod, values: closePrices});
+    let emaLong = EMA.calculate({period: emaLongPeriod, values: closePrices});
 
     return {
-        smaShort: smaShort,
-        smaLong: smaLong
+        emaShort: emaShort,
+        emaLong: emaLong
     };
 }
 
 async function ema(symbol, trend = true) {
 
     let closePrices = await fetchOHLCV(symbol);
-    let {smaShort, smaLong} = await calculateSMA(closePrices);
+    let {emaShort, emaLong} = await calculateEMA(closePrices);
 
-    let lastSmaShort = smaShort[smaShort.length - 1];
-    let lastSmaLong = smaLong[smaLong.length - 1];
-    console.log(`交易对 ${symbol} ${timeframe} 均线 ${smaShortPeriod} ${smaLongPeriod} 最新值 ${lastSmaShort} ${lastSmaLong}`);
+    let lastEmaShort = emaShort[emaShort.length - 1];
+    let lastEmaLong = emaLong[emaLong.length - 1];
+    console.log(`交易对 ${symbol} ${timeframe} 均线 ${emaShortPeriod} ${emaLongPeriod} 最新值 ${lastEmaShort} ${lastEmaLong}`);
 
     let positions = await exchange.fetchPositions();
     positions = positions.filter(x => x.notional !== 0);
@@ -56,14 +56,13 @@ async function ema(symbol, trend = true) {
     let shortCondition;
     if (trend) {
         // 趋势策略
-        longCondition = lastSmaShort > lastSmaLong;
-        shortCondition = lastSmaShort < lastSmaLong;
+        longCondition = lastEmaShort > lastEmaLong;
+        shortCondition = lastEmaShort < lastEmaLong;
     } else {
         // 反转策略
-        longCondition = lastSmaShort < lastSmaLong;
-        shortCondition = lastSmaShort > lastSmaLong;
+        longCondition = lastEmaShort < lastEmaLong;
+        shortCondition = lastEmaShort > lastEmaLong;
     }
-
 
     if (longCondition) {
         if (position && Number(position.info.positionAmt) > 0) {
