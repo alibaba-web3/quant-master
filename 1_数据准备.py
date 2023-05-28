@@ -11,7 +11,13 @@ import concurrent.futures
 exchange = ccxt.binance({
     'rateLimit': 1200,  # Binance API rate limit
     'enableRateLimit': True,
-    'options': {'defaultType': 'future'},
+    'options': {
+        'defaultType': 'future',
+    },
+    'proxies': {
+        'http': 'http://127.0.0.1:7890',
+        'https': 'http://127.0.0.1:7890'
+    }
 })
 
 
@@ -21,7 +27,7 @@ def save_binance_data(symbol, timeframe, to_path='./data/binance/1d'):
         os.makedirs(to_path)
 
     # 检查历史数据文件是否存在
-    to_path = os.path.join(to_path, timeframe, f"{symbol.replace('/', '-')}-{timeframe}.csv")
+    to_path = os.path.join(to_path, f"{symbol.replace('/', '-')}-{timeframe}.csv")
 
     if os.path.isfile(to_path):
         # 如果文件存在，则加载已有数据
@@ -55,17 +61,27 @@ def save_binance_data(symbol, timeframe, to_path='./data/binance/1d'):
 
 
 def download_all_binance_data(timeframe, to_path='./data/binance/'):
-    markets = exchange.load_markets()
-    symbols = [symbol for symbol in markets if
-               markets[symbol]['info']['quoteAsset'] == 'USDT' and markets[symbol]['info'][
-                   'contractType'] == 'PERPETUAL']
+    exchange.load_markets()
 
+    # 只保留永续合约
+
+    symbols = [symbol.replace(":USDT", "") for symbol in exchange.symbols if ':USDT' in symbol and "-" not in symbol]
+
+    # 检查目标文件夹是否存在
+    if not os.path.exists(to_path):
+        os.makedirs(to_path)
+    to_path = os.path.join(to_path, timeframe)
+    if not os.path.exists(to_path):
+        os.makedirs(to_path)
     to_path = os.path.abspath(to_path)
+
+    # 单线程下载
     # for index, symbol in enumerate(symbols):
     #     print(f"Current iteration: {index + 1}/{len(symbols)}")
     #
     #     save_binance_data(symbol, timeframe, to_path=to_path)
 
+    # 多线程下载
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = {executor.submit(save_binance_data, symbol, timeframe, to_path=to_path): symbol for symbol in symbols}
 
@@ -98,7 +114,8 @@ def fetch_all_ohlcv(symbol, timeframe, start_time=1514764800000):
         klines_df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
         # 转换时间戳为日期时间
         klines_df['timestamp'] = pd.to_datetime(klines_df['timestamp'], unit='ms')
-        print("获取 {} k 线数据，时间段：{} - {}".format(symbol, klines_df['timestamp'].iloc[0], klines_df['timestamp'].iloc[-1]))
+        print("获取 {} k 线数据，时间段：{} - {}".format(symbol, klines_df['timestamp'].iloc[0],
+                                                       klines_df['timestamp'].iloc[-1]))
 
         # 将数据添加到总的DataFrame中
         df = pd.concat([df, klines_df])
@@ -108,4 +125,4 @@ def fetch_all_ohlcv(symbol, timeframe, start_time=1514764800000):
 
 
 if __name__ == "__main__":
-    download_all_binance_data('1h')
+    download_all_binance_data('4h')
