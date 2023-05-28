@@ -102,14 +102,33 @@ async function main() {
     while (true) {
         console.log("start");
         try {
+            // 趋势策略
             let trendSymbols = ['BTCUSDT'];
             for (let symbol of trendSymbols) {
                 await ema(symbol, true);
             }
 
+            // 反转策略
             let reverseSymbols = ['CRVUSDT'];
             for (let symbol of reverseSymbols) {
                 await ema(symbol, false);
+            }
+
+            // 未选中的币平仓
+            let positions = await exchange.fetchPositions();
+            positions = positions.filter(x => x.notional !== 0);
+            let symbols = trendSymbols.concat(reverseSymbols);
+            for (let position of positions) {
+                let symbol = position.info.symbol;
+                if (!symbols.includes(symbol)) {
+                    console.warn(`未选中的币 ${symbol} 平仓`);
+//                    let amount = Math.abs(position.info.positionAmt);
+//                    if (Number(position.info.positionAmt) > 0) {
+//                        await createBestLimitSellOrderByAmountUntilFilled(symbol, amount);
+//                    } else {
+//                        await createBestLimitBuyOrderByAmountUntilFilled(symbol, amount);
+//                    }
+                }
             }
         } catch (e) {
             console.error("均线策略异常", e);
