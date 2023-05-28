@@ -1,24 +1,26 @@
 import os
 
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from function import *
 
-# 示例策略：BTC 定投
-
-# 每天定投金额
+# 单次交易金额
 invest = 100
 fee = 0.0006
 start_date = '2023-01-01'
 end_date = '2024-01-01'
+timeframe = '1h'
+select = []
 
 root_path = os.path.abspath(os.path.dirname(__file__))
+ohlcv_dir_path = root_path + '/data/binance/' + timeframe + '/'
 
 
 # 读取整理数据
 def read_data(s):
     # 返回当前文件路径
-    path = root_path + '/data/binance/1h/' + s + '-1h.csv'
+    path = ohlcv_dir_path + s + '-' + timeframe + '.csv'
     df = pd.read_csv(path, encoding='utf-8', skiprows=0)
 
     df["date"] = pd.to_datetime(df["timestamp"]).dt.date
@@ -39,9 +41,9 @@ def read_data(s):
 
 
 # 策略实现
-def strategy(df):
-    short_rolling = df['close'].rolling(window=shortEma).mean()
-    long_rolling = df['close'].rolling(window=longEma).mean()
+def strategy(df, short_ema=5, long_ema=20):
+    short_rolling = df['close'].rolling(window=short_ema).mean()
+    long_rolling = df['close'].rolling(window=long_ema).mean()
 
     # 创建一个signal列，当短期平均线上穿长期平均线时设置为1，下穿时设置为-1
     df['signal'] = 0
@@ -72,8 +74,11 @@ def strategy(df):
     # df["date"] = pd.to_datetime(df["timestamp"]).dt.date
     revenue = df["revenueRate"].iloc[-1]
     fee_rate = df["cumulative_fee"].iloc[-1]
+
     if revenue > 0.2:
-        print(f"{shortEma} {longEma} {symbol} 最终收益率：", revenue)
+        print(f"{symbol} 最终收益率：", format(revenue, '.3f'))
+        select.append(symbol)
+
     # print(f" {shortEma} {longEma} {symbol} 最终收益率：{format(revenue, '.3f')}, 手续费 {format(fee_rate, '.3f')}")
     return revenue, fee_rate
 
@@ -85,9 +90,13 @@ def main(s):
     revenue, fee_rate = strategy(df)
     # 策略分析
     # analyze_strategy(df)
-    # 资金曲线
-    # df.plot('date', y=['revenueRate'])
-    # plt.show()
+
+    if revenue > 0.2:
+        # 资金曲线
+        df.plot('date', y=['revenueRate'])
+        # 设置图表名称
+        plt.title(s)
+        # plt.show()
 
     return revenue, fee_rate
 
@@ -95,12 +104,12 @@ def main(s):
 # 获取文件夹下所有文件名
 total_revenue = 0
 total_fee = 0
-for root, dirs, files in os.walk(root_path + '/data/binance/1h/'):
+for root, dirs, files in os.walk(ohlcv_dir_path):
     shortEma = 5
     longEma = 20
     for file in files:
         if file.endswith(".csv"):
-            symbol = file.split("-1h")[0]
+            symbol = file.split("-" + timeframe)[0]
             revenue, fee_rate = main(symbol)
             total_revenue += revenue
             total_fee += fee_rate
@@ -114,3 +123,4 @@ for root, dirs, files in os.walk(root_path + '/data/binance/1h/'):
 #         total_fee += fee_rate
 
 print("总收益率：", total_revenue, "总手续费：", total_fee)
+print(select)
