@@ -1,6 +1,7 @@
 const config = require("./config.json");
 const HttpsProxyAgent = require("https-proxy-agent");
 const fetch = require("node-fetch");
+import crypto from "crypto";
 
 // 官方文档：https://github.com/ccxt/ccxt
 const ccxt = require("ccxt");
