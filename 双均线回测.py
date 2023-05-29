@@ -124,4 +124,5 @@ for root, dirs, files in os.walk(ohlcv_dir_path):
 
 print("总收益率：", total_revenue, "总手续费：", total_fee)
 
+select = "[" + ', '.join(f'"{pair}"' for pair in select) + "]"
 print(select)
