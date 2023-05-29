@@ -77,7 +77,7 @@ def strategy(df, short_ema=5, long_ema=20):
 
     if revenue > 0.2:
         print(f"{symbol} 最终收益率：", format(revenue, '.3f'))
-        select.append(symbol)
+        select.append(symbol.replace('-', ''))
 
     # print(f" {shortEma} {longEma} {symbol} 最终收益率：{format(revenue, '.3f')}, 手续费 {format(fee_rate, '.3f')}")
     return revenue, fee_rate
@@ -123,4 +123,5 @@ for root, dirs, files in os.walk(ohlcv_dir_path):
 #         total_fee += fee_rate
 
 print("总收益率：", total_revenue, "总手续费：", total_fee)
+
 print(select)
