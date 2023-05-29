@@ -3,7 +3,8 @@ const {
     exchange,
     sleep,
     createBestLimitBuyOrderUntilFilled,
-    createBestLimitSellOrderUntilFilled
+    createBestLimitSellOrderUntilFilled,
+    ding
 } = require("./function.js");
 const {createBestLimitSellOrderByAmountUntilFilled, createBestLimitBuyOrderByAmountUntilFilled} = require("./function");
 const emaConfig = require("./emaConfig.json");
@@ -133,6 +134,7 @@ async function main() {
             }
         } catch (e) {
             console.error("均线策略异常", e);
+            await ding("均线策略异常", e.message);
             break;
         }
 

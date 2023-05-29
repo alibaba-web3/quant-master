@@ -243,6 +243,40 @@ async function cancelOrder(symbol, orderId) {
     return exchange.cancelOrder(orderId, symbol);
 }
 
+// 发送消息到钉钉机器人
+async function ding(content) {
+
+    if (config.env === "local") {
+        return;
+    }
+    const body = {
+        text: {
+            content,
+        },
+        msgtype: "text",
+    };
+
+    const access_token = config?.dingTalk?.accessToken;
+    const secret = config?.dingTalk?.secret;
+    const timestamp = new Date().getTime();
+    const stringToSign = timestamp + "\n" + secret;
+    const sign = crypto
+        .createHmac("sha256", secret)
+        .update(stringToSign)
+        .digest("base64");
+    // 最终得到的签名sign
+    const sign_urlEncode = encodeURIComponent(sign);
+
+    return await requestMethod(
+        `https://oapi.dingtalk.com/robot/send?access_token=${access_token}&sign=${sign_urlEncode}&timestamp=${timestamp}`,
+        {
+            method: "post",
+            body: JSON.stringify(body),
+            headers: {"Content-Type": "application/json"},
+        }
+    );
+}
+
 module.exports = {
     sleep,
     exchange,
@@ -253,5 +287,6 @@ module.exports = {
     createBestLimitBuyOrderByAmount,
     createBestLimitBuyOrderByAmountUntilFilled,
     createBestLimitSellOrderByAmountUntilFilled,
-    getBestPrice
+    getBestPrice,
+    ding
 };
