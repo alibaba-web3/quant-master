@@ -6,15 +6,16 @@ const {
     createBestLimitSellOrderUntilFilled
 } = require("./function.js");
 const {createBestLimitSellOrderByAmountUntilFilled, createBestLimitBuyOrderByAmountUntilFilled} = require("./function");
+const emaConfig = require("./emaConfig.json");
 
 // 下单金额
-let invest = 50;
+let invest = emaConfig.invest;
 // 短均线周期
-let emaShortPeriod = 5;
+let emaShortPeriod = emaConfig.emaShortPeriod;
 // 长均线周期
-let emaLongPeriod = 20;
+let emaLongPeriod = emaConfig.emaLongPeriod;
 // k 线级别
-let timeframe = '1h';
+let timeframe = emaConfig.timeframe;
 
 
 /**
@@ -103,13 +104,13 @@ async function main() {
         console.log("start");
         try {
             // 趋势策略
-            let trendSymbols = ['BTCUSDT'];
+            let trendSymbols = emaConfig.trendSymbols;
             for (let symbol of trendSymbols) {
                 await ema(symbol, true);
             }
 
             // 反转策略
-            let reverseSymbols = ['CRVUSDT'];
+            let reverseSymbols = emaConfig.reverseSymbols;
             for (let symbol of reverseSymbols) {
                 await ema(symbol, false);
             }
@@ -136,7 +137,7 @@ async function main() {
         }
 
         // 每小时执行一次
-        await sleep(1000 * 60 * 60);
+        await sleep(1000 * 60 * 60 * emaConfig.holdPeriod);
 
         // 测试使用
         // await sleep(1000);
