@@ -2,5 +2,21 @@
   "apiKey": "填入自己的 api key",
   "apiSecret": "填入自己的 api secret",
   "env": "local",
-  "proxy": "代理服务器地址"
+  "proxy": "http://127.0.0.1:7890",
+  "dingTalk": {
+    "accessToken": "钉钉通知机器人 token",
+    "secret": "钉钉通知机器人秘钥"
+  },
+  "invest": 50,
+  "emaShortPeriod": 5,
+  "emaLongPeriod": 20,
+  "timeframe": "1h",
+  "holdPeriod": 1,
+  "trendSymbols": [
+    "BTCUSDT"
+  ],
+  "reverseSymbols": [
+    "CRVUSDT"
+  ]
 }
+

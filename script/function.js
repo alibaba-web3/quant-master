@@ -1,16 +1,22 @@
-const config = require("./config.json");
+const fs = require("fs");
+const path = require('path');
 const HttpsProxyAgent = require("https-proxy-agent");
 const fetch = require("node-fetch");
-import crypto from "crypto";
-
+const crypto = require("crypto");
 // 官方文档：https://github.com/ccxt/ccxt
+// pkg 打包需要指定绝对路径
 const ccxt = require("ccxt");
+const process = require("process");
+
+// pkg 动态配置需要指定绝对路径
+const configPath = path.join(__dirname, 'config.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
 // 代理服务
 const agent = new HttpsProxyAgent(config.proxy);
 
 const requestMethod = function (url, options) {
-    if (config.env === "local") {
+    if (config.proxy) {
         return fetch(url, Object.assign({}, options, {agent: agent}));
     } else {
         return fetch(url, Object.assign({}, options));
@@ -278,6 +284,26 @@ async function ding(content) {
     );
 }
 
+function readConfig() {
+    // pkg 动态配置需要指定绝对路径
+    let configPath;
+    if (fs.existsSync(path.join(process.cwd(), 'config.json'))) {
+        // dist 内执行
+        configPath = path.join(process.cwd(), 'config.json');
+    } else if (fs.existsSync(path.join(process.cwd() + '/Desktop/dist', 'config.json'))) {
+        // mac 桌面执行
+        configPath = path.join(process.cwd() + '/Desktop/dist', 'config.json');
+    } else if (fs.existsSync(path.join(process.cwd() + '/dist', 'config.json'))) {
+        // dist 外执行
+        configPath = path.join(process.cwd() + '/dist', 'config.json');
+    } else {
+        // 本地执行
+        configPath = path.join(__dirname, 'config.json');
+    }
+
+    return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+}
+
 module.exports = {
     sleep,
     exchange,
@@ -289,5 +315,6 @@ module.exports = {
     createBestLimitBuyOrderByAmountUntilFilled,
     createBestLimitSellOrderByAmountUntilFilled,
     getBestPrice,
-    ding
+    ding,
+    readConfig
 };

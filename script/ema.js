@@ -4,10 +4,11 @@ const {
     sleep,
     createBestLimitBuyOrderUntilFilled,
     createBestLimitSellOrderUntilFilled,
-    ding
+    ding,
+    readConfig
 } = require("./function.js");
 const {createBestLimitSellOrderByAmountUntilFilled, createBestLimitBuyOrderByAmountUntilFilled} = require("./function");
-const emaConfig = require("./emaConfig.json");
+const emaConfig = readConfig();
 
 // 下单金额
 let invest = emaConfig.invest;
@@ -66,6 +67,8 @@ async function ema(symbol, trend = true) {
         shortCondition = lastEmaShort > lastEmaLong;
     }
 
+    return;
+
     if (longCondition) {
         if (position && Number(position.info.positionAmt) > 0) {
             console.log(`${symbol} 已有仓位，不再做多`);
@@ -102,7 +105,7 @@ async function main() {
     await exchange.loadMarkets();
 
     while (true) {
-        console.log("start");
+        console.log("策略开始执行: " + new Date());
         try {
             // 趋势策略
             let trendSymbols = emaConfig.trendSymbols;
@@ -124,12 +127,12 @@ async function main() {
                 let symbol = position.info.symbol;
                 if (!symbols.includes(symbol)) {
                     console.warn(`未选中的币 ${symbol} 平仓`);
-//                    let amount = Math.abs(position.info.positionAmt);
-//                    if (Number(position.info.positionAmt) > 0) {
-//                        await createBestLimitSellOrderByAmountUntilFilled(symbol, amount);
-//                    } else {
-//                        await createBestLimitBuyOrderByAmountUntilFilled(symbol, amount);
-//                    }
+                    let amount = Math.abs(position.info.positionAmt);
+                    if (Number(position.info.positionAmt) > 0) {
+                        await createBestLimitSellOrderByAmountUntilFilled(symbol, amount);
+                    } else {
+                        await createBestLimitBuyOrderByAmountUntilFilled(symbol, amount);
+                    }
                 }
             }
         } catch (e) {
@@ -146,5 +149,5 @@ async function main() {
     }
 }
 
-main();
+module.exports = main;
 
