@@ -41,14 +41,14 @@ def read_data(s):
 
 
 # 策略实现
-def strategy(df, short_ema=5, long_ema=20):
+def strategy(df, short_ema, long_ema):
     short_rolling = df['close'].rolling(window=short_ema).mean()
     long_rolling = df['close'].rolling(window=long_ema).mean()
 
     # 创建一个signal列，当短期平均线上穿长期平均线时设置为1，下穿时设置为-1
     df['signal'] = 0
-    df.loc[short_rolling > long_rolling, 'signal'] = -1
-    df.loc[short_rolling < long_rolling, 'signal'] = 1
+    df.loc[short_rolling > long_rolling, 'signal'] = 1
+    df.loc[short_rolling < long_rolling, 'signal'] = -1
 
     # 计算日收益
     df['daily_return'] = df['close'].pct_change()
@@ -86,8 +86,10 @@ def strategy(df, short_ema=5, long_ema=20):
 def main(s):
     # 读取数据
     df = read_data(s)
+    shortEma = 7
+    longEma = 30
     # 策略逻辑
-    revenue, fee_rate = strategy(df)
+    revenue, fee_rate = strategy(df, shortEma, longEma)
     # 策略分析
     # analyze_strategy(df)
 
@@ -105,8 +107,7 @@ def main(s):
 total_revenue = 0
 total_fee = 0
 for root, dirs, files in os.walk(ohlcv_dir_path):
-    shortEma = 5
-    longEma = 20
+
     for file in files:
         if file.endswith(".csv"):
             symbol = file.split("-" + timeframe)[0]
