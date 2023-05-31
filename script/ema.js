@@ -147,5 +147,6 @@ async function main() {
     }
 }
 
-module.exports = main;
+main();
+// module.exports = main;
 
