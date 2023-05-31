@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "pkg": " pkg . -t node18-macos-x64 --debug"
+    "pkg": "pkg ."
   },
   "author": "",
   "license": "ISC",
@@ -18,14 +18,19 @@
   },
   "devDependencies": {
     "parcel": "^2.9.1",
-    "pkg": "^5.8.1"
+    "pkg": "^5.8.1",
+    "webpack": "^5.84.1",
+    "webpack-cli": "^5.1.1"
   },
   "description": "",
   "bin": "./index.js",
   "pkg": {
+    "main": "./index.js",
+    "assets": [],
     "scripts": "node_modules/ccxt/dist/ccxt.cjs",
     "targets": [
-      " node18-macos-x64"
+      "node18-linux-x64",
+      "node18-macos-x64"
     ],
     "outputPath": "dist"
   }
