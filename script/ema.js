@@ -67,8 +67,6 @@ async function ema(symbol, trend = true) {
         shortCondition = lastEmaShort > lastEmaLong;
     }
 
-    return;
-
     if (longCondition) {
         if (position && Number(position.info.positionAmt) > 0) {
             console.log(`${symbol} 已有仓位，不再做多`);
@@ -109,13 +107,13 @@ async function main() {
         try {
             // 趋势策略
             let trendSymbols = emaConfig.trendSymbols;
-            for (let symbol of trendSymbols) {
+            for await (let symbol of trendSymbols) {
                 await ema(symbol, true);
             }
 
             // 反转策略
             let reverseSymbols = emaConfig.reverseSymbols;
-            for (let symbol of reverseSymbols) {
+            for await (let symbol of reverseSymbols) {
                 await ema(symbol, false);
             }
 

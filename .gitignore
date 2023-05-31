@@ -7,3 +7,4 @@ script/node_modules/
 script/.idea
 __pycache__/
 script/.parcel-cache
+script/dist/
