@@ -8,7 +8,8 @@ const {
     readConfig
 } = require("./function.js");
 const {createBestLimitSellOrderByAmountUntilFilled, createBestLimitBuyOrderByAmountUntilFilled} = require("./function");
-const emaConfig = readConfig();
+const config = readConfig();
+const emaConfig = config.ema;
 
 // 下单金额
 let invest = emaConfig.invest;
