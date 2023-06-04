@@ -304,6 +304,25 @@ function readConfig() {
     return JSON.parse(fs.readFileSync(configPath, 'utf8'));
 }
 
+async function updateAllLeverage(leverage) {
+
+    let markets = await exchange.fetchMarkets();
+
+    markets = markets.filter(symbol => symbol.info.contractType === 'PERPETUAL');
+
+    for (let market of markets) {
+        let symbol = market.info.symbol
+        try {
+            let response = await exchange.fapiPrivatePostLeverage({
+                'symbol': symbol,
+                'leverage': leverage,
+            });
+        } catch (error) {
+            console.log(symbol, error);
+        }
+    }
+}
+
 module.exports = {
     sleep,
     exchange,
@@ -316,5 +335,6 @@ module.exports = {
     createBestLimitSellOrderByAmountUntilFilled,
     getBestPrice,
     ding,
-    readConfig
+    readConfig,
+    updateAllLeverage
 };
