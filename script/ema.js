@@ -109,13 +109,22 @@ async function main() {
             // 趋势策略
             let trendSymbols = emaConfig.trendSymbols;
             for await (let symbol of trendSymbols) {
-                await ema(symbol, true);
+                try {
+                    await ema(symbol, true);
+                } catch (e) {
+                    console.error(`趋势策略执行异常 ${symbol}`, e);
+                }
+
             }
 
             // 反转策略
             let reverseSymbols = emaConfig.reverseSymbols;
             for await (let symbol of reverseSymbols) {
-                await ema(symbol, false);
+                try {
+                    await ema(symbol, false);
+                } catch (e) {
+                    console.error(`反转策略执行异常 ${symbol}`, e);
+                }
             }
 
             // 未选中的币平仓
