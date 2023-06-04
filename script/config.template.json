@@ -7,16 +7,18 @@
     "accessToken": "钉钉通知机器人 token",
     "secret": "钉钉通知机器人秘钥"
   },
-  "invest": 50,
-  "emaShortPeriod": 5,
-  "emaLongPeriod": 20,
-  "timeframe": "1h",
-  "holdPeriod": 1,
-  "trendSymbols": [
-    "BTCUSDT"
-  ],
-  "reverseSymbols": [
-    "CRVUSDT"
-  ]
+  "ema": {
+    "invest": 50,
+    "emaShortPeriod": 5,
+    "emaLongPeriod": 20,
+    "timeframe": "1h",
+    "holdPeriod": 1,
+    "trendSymbols": [
+      "BTCUSDT"
+    ],
+    "reverseSymbols": [
+      "CRVUSDT"
+    ]
+  }
 }
 
