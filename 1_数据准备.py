@@ -67,6 +67,8 @@ def download_all_binance_data(timeframe, to_path='./data/binance/'):
 
     symbols = [symbol.replace(":USDT", "") for symbol in exchange.symbols if ':USDT' in symbol and "-" not in symbol]
 
+    print(symbols)
+
     # 检查目标文件夹是否存在
     if not os.path.exists(to_path):
         os.makedirs(to_path)
