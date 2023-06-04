@@ -10,7 +10,7 @@ invest = 100
 fee = 0.0006
 start_date = '2023-01-01'
 end_date = '2024-01-01'
-timeframe = '1h'
+timeframe = '4h'
 select = []
 
 root_path = os.path.abspath(os.path.dirname(__file__))
@@ -103,7 +103,7 @@ def main(s):
     return revenue, fee_rate
 
 
-# 获取文件夹下所有文件名
+# 回测所有的币
 total_revenue = 0
 total_fee = 0
 for root, dirs, files in os.walk(ohlcv_dir_path):
@@ -115,7 +115,11 @@ for root, dirs, files in os.walk(ohlcv_dir_path):
             total_revenue += revenue
             total_fee += fee_rate
 
-# main('BTC-USDT')
+# 单个币回测
+# symbol = 'BTC-USDT'
+# revenue, fee_rate = main(symbol)
+# total_revenue += revenue
+# total_fee += fee_rate
 
 # for shortEma in range(4, 7):
 #     for longEma in range(shortEma + 15, 30):
