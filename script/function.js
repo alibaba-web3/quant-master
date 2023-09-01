@@ -336,5 +336,6 @@ module.exports = {
     getBestPrice,
     ding,
     readConfig,
-    updateAllLeverage
+    updateAllLeverage,
+    requestMethod
 };

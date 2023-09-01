@@ -29,3 +29,4 @@ def analyze_strategy(df):
     print("胜率：", format(df["winRate"].mean() * 100, ".2f"), "%")
     print("盈亏比：", format(df["winRate"].mean() / (1 - df["winRate"].mean()), ".2f"))
     print("夏普比率：", format(sharpe_ratio, ".2f"))
+    return revenue_rate,sharpe_ratio

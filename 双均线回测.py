@@ -98,7 +98,7 @@ def main(s):
         df.plot('date', y=['revenueRate'])
         # 设置图表名称
         plt.title(s)
-        # plt.show()
+        plt.show()
 
     return revenue, fee_rate
 
@@ -106,26 +106,26 @@ def main(s):
 # 回测所有的币
 total_revenue = 0
 total_fee = 0
-for root, dirs, files in os.walk(ohlcv_dir_path):
-
-    for file in files:
-        if file.endswith(".csv"):
-            symbol = file.split("-" + timeframe)[0]
-            revenue, fee_rate = main(symbol)
-            total_revenue += revenue
-            total_fee += fee_rate
+# for root, dirs, files in os.walk(ohlcv_dir_path):
+#
+#     for file in files:
+#         if file.endswith(".csv"):
+#             symbol = file.split("-" + timeframe)[0]
+#             revenue, fee_rate = main(symbol)
+#             total_revenue += revenue
+#             total_fee += fee_rate
 
 # 单个币回测
-# symbol = 'BTC-USDT'
-# revenue, fee_rate = main(symbol)
-# total_revenue += revenue
-# total_fee += fee_rate
+symbol = 'BTC-USDT'
+revenue, fee_rate = main(symbol)
+total_revenue += revenue
+total_fee += fee_rate
 
-# for shortEma in range(4, 7):
-#     for longEma in range(shortEma + 15, 30):
-#         revenue, fee_rate = main('BNB-USDT')
-#         total_revenue += revenue
-#         total_fee += fee_rate
+for shortEma in range(4, 7):
+    for longEma in range(shortEma + 15, 30):
+        revenue, fee_rate = main('BNB-USDT')
+        total_revenue += revenue
+        total_fee += fee_rate
 
 print("总收益率：", total_revenue, "总手续费：", total_fee)
 

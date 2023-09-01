@@ -1,0 +1,11 @@
+const data1 = ["SOLUSDT", "ARPAUSDT", "ICXUSDT", "STGUSDT", "ROSEUSDT", "CVXUSDT", "HFTUSDT", "ARBUSDT", "LINAUSDT", "KSMUSDT", "MASKUSDT", "GALAUSDT", "GALUSDT", "CELRUSDT", "RENUSDT", "OMGUSDT", "AGIXUSDT", "ZRXUSDT", "RUNEUSDT", "GTCUSDT", "FTMUSDT", "ETHUSDT", "ONTUSDT", "RSRUSDT", "AXSUSDT", "KLAYUSDT", "DEFIUSDT", "NKNUSDT", "DARUSDT", "IDUSDT", "APTUSDT", "1000PEPEUSDT", "RNDRUSDT", "GMTUSDT", "DUSKUSDT", "SXPUSDT", "GRTUSDT"]
+
+const data2 = ["SOLUSDT", "STXUSDT", "ARPAUSDT", "ICXUSDT", "STGUSDT", "CVXUSDT", "ARBUSDT", "FILUSDT", "OPUSDT", "LINAUSDT", "IOTXUSDT", "MASKUSDT", "RENUSDT", "MAGICUSDT", "MTLUSDT", "WAVESUSDT", "BATUSDT", "OMGUSDT", "AGIXUSDT", "ATAUSDT", "VETUSDT", "ZRXUSDT", "RUNEUSDT", "GTCUSDT", "WOOUSDT", "FTMUSDT", "COCOSUSDT", "RSRUSDT", "CFXUSDT", "MATICUSDT", "MANAUSDT", "ALPHAUSDT", "COTIUSDT", "NKNUSDT", "DARUSDT", "HIGHUSDT", "BLZUSDT", "APTUSDT", "PHBUSDT", "CKBUSDT", "RNDRUSDT", "INJUSDT", "GMTUSDT", "SXPUSDT", "GRTUSDT", "DENTUSDT"]
+
+
+// 计算两个数据之间的重合度
+const intersection = data1.filter(symbol => data2.includes(symbol));
+const overlapPercentage = (intersection.length / data1.length) * 100;
+
+console.log(`重合的交易对数量: ${intersection.length}`);
+console.log(`重合度百分比: ${overlapPercentage.toFixed(2)}%`);

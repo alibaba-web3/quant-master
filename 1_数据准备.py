@@ -8,16 +8,19 @@ import pandas as pd
 import os
 import concurrent.futures
 
+proxies = {
+    'http': 'http://127.0.0.1:7890',
+    'https': 'http://127.0.0.1:7890',
+}
+
 exchange = ccxt.binance({
-    'rateLimit': 1200,  # Binance API rate limit
-    'enableRateLimit': True,
-    'options': {
-        'defaultType': 'future',
-    },
-    'proxies': {
-        'http': 'http://127.0.0.1:7890',
-        'https': 'http://127.0.0.1:7890'
-    }
+    # 'options': {
+    #     'defaultType': 'future',
+    # },
+    'proxies': proxies,
+    'apiKey': 'M4oxrGe5Fp9RmCLKJPH2UJDdY4WTyhDzwu33wqGdiY8n3Fj0GRcGE6w3vWePqTzk',
+    'secret': 'hmL6XSWnFPrSGuRhMeWeSTk1Gl7FxBemSPvCf2NGamVlroSSqqlxyez1dotSs49Q'
+
 })
 
 
@@ -127,4 +130,9 @@ def fetch_all_ohlcv(symbol, timeframe, start_time=1514764800000):
 
 
 if __name__ == "__main__":
-    download_all_binance_data('4h')
+    # download_all_binance_data('1h')
+    # download_all_binance_data('2h')
+    # download_all_binance_data('4h')
+    # download_all_binance_data('8h')
+    # download_all_binance_data('1d')
+    save_binance_data('SLPUSDT', '4h', './data/binance/1h')
