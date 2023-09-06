@@ -14,9 +14,9 @@ proxies = {
 }
 
 exchange = ccxt.binance({
-    # 'options': {
-    #     'defaultType': 'future',
-    # },
+    'options': {
+        'defaultType': 'future',
+    },
     'proxies': proxies,
     'apiKey': 'M4oxrGe5Fp9RmCLKJPH2UJDdY4WTyhDzwu33wqGdiY8n3Fj0GRcGE6w3vWePqTzk',
     'secret': 'hmL6XSWnFPrSGuRhMeWeSTk1Gl7FxBemSPvCf2NGamVlroSSqqlxyez1dotSs49Q'
@@ -135,4 +135,5 @@ if __name__ == "__main__":
     # download_all_binance_data('4h')
     # download_all_binance_data('8h')
     # download_all_binance_data('1d')
-    save_binance_data('SLPUSDT', '4h', './data/binance/1h')
+    save_binance_data('CRVUSDT', '1h', './data/binance/1h')
+    save_binance_data('CVXUSDT', '1h', './data/binance/1h')
