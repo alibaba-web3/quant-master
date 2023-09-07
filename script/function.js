@@ -337,5 +337,6 @@ module.exports = {
     ding,
     readConfig,
     updateAllLeverage,
-    requestMethod
+    requestMethod,
+    createLimitSellOrder
 };
